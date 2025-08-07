@@ -28,10 +28,8 @@ export const AuthProvider = ({ children }) => {
         console.log(res.data.data);
         setUser(res.data.data); // backend returns { data: user }
       } catch (error) {
-        // Only set user to null if it's not a 401 error (handled by interceptor)
-        if (error.response?.status !== 401) {
-          setUser(null);
-        }
+        // Set user to null for any error, but don't redirect on public routes
+        setUser(null);
       } finally {
         setLoading(false);
       }

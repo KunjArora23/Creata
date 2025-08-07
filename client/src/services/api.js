@@ -31,11 +31,11 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         const path = window.location.pathname;
-        if (
-          !path.startsWith('/login') &&
-          !path.startsWith('/register') &&
-          !path.startsWith('/forgot-password')
-        ) {
+        // Only redirect to login for protected routes, not public routes like homepage
+        const protectedRoutes = ['/dashboard', '/profile', '/task-board', '/friends', '/chat', '/transactions', '/notifications'];
+        const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
+        
+        if (isProtectedRoute) {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);

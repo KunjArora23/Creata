@@ -4,11 +4,18 @@ function ChatWindow({ friend, messages, onSend }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
+useEffect(() => {
+  const messagesContainer = messagesEndRef.current?.parentElement;
+
+  if (messagesContainer) {
+    const isNearBottom =
+      messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 100;
+
+    if (isNearBottom) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }
+}, [messages]);
 
   function handleSend(e) {
     e.preventDefault();
@@ -26,7 +33,7 @@ function ChatWindow({ friend, messages, onSend }) {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-xl ring-1 ring-black ring-opacity-10">
+    <div className="flex flex-col h-[calc(100vh-64px)] max-w-2xl mx-auto bg-gray-900 rounded-2xl shadow-xl ring-1 ring-black ring-opacity-10">
       {/* Header */}
       <header className="flex items-center gap-4 p-5 border-b border-gray-800 bg-gray-850">
         <div className="relative flex-shrink-0">

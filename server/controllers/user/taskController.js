@@ -36,24 +36,61 @@ export const getAllTasks = async (req, res) => {
 };
 
 // Request to perform a task
-export const requestTask = async (req, res) => {
+export const requestTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
     const task = await Task.findById(taskId);
+
     if (!task) {
       return res.status(404).json({ success: false, message: 'Task not found' });
     }
-    if (task.requests.includes(req.user._id)) {
-      return res.status(400).json({ success: false, message: 'Already requested' });
-    }
-    if (task.status === 'assigned' || task.status === 'in_progress' || task.status === 'completed' || task.status === 'cancelled') {
-      return res.status(400).json({ success: false, message: 'Task is not accepting requests now' });
+
+    // Check if user is the task creator
+    if (task.createdBy.equals(req.user._id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot request your own task'
+      });
     }
 
+    // Check if already requested (using toString() for reliable comparison)
+    if (task.requests.some(requestId => requestId.toString() === req.user._id.toString())) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already requested this task'
+      });
+    }
+
+    // Check task status and request limit
+    if (task.status !== 'open' && task.status !== 'requested') {
+      return res.status(400).json({
+        success: false,
+        message: 'Task is not accepting requests'
+      });
+    }
+
+    if (task.requests.length >= task.maxRequests) {
+      return res.status(400).json({
+        success: false,
+        message: 'Task has reached maximum request limit'
+      });
+    }
+
+    // Add request
     task.requests.push(req.user._id);
-    task.status = 'requested';
+
+    // Update status if first request
+    if (task.status === 'open') {
+      task.status = 'requested';
+    }
+
     await task.save();
-    res.json({ success: true, message: 'Request sent' });
+
+    res.json({
+      success: true,
+      message: 'Request sent successfully',
+      taskStatus: task.status
+    });
   } catch (err) {
     next(err);
   }
@@ -290,7 +327,7 @@ export const withdrawFromTask = async (req, res, next) => {
 };
 
 // Add rating and review
-export const addReview = async (req, res,next) => {
+export const addReview = async (req, res, next) => {
   try {
     const { taskId } = req.params;
     const { toUser, rating, comment } = req.body;
@@ -311,12 +348,12 @@ export const addReview = async (req, res,next) => {
 };
 
 // Get reviews for a user
-export const getUserReviews = async (req, res,next) => {
+export const getUserReviews = async (req, res, next) => {
   try {
     const { userId } = req.params;
 
     const reviews = await Review.find({ toUser: userId }).populate('fromUser', 'name email');
-    res.json({ success: true, reviews,message:"Reviews fetched successfully" });
+    res.json({ success: true, reviews, message: "Reviews fetched successfully" });
   } catch (err) {
     next(err);
   }

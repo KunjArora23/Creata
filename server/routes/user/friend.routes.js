@@ -1,5 +1,5 @@
 import express from 'express';
-import { sendFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend, getConnections, searchUsers, getFriendRequests } from '../../controllers/user/friendController.js';
+import { sendFriendRequest, acceptFriendRequest, rejectFriendRequest, removeFriend, getConnections, searchUsers, getFriendRequests, getSentRequests } from '../../controllers/user/friendController.js';
 import { authorizeRoles } from '../../middlewares/verifyToken.middleware.js';
 
 const router = express.Router();
@@ -13,6 +13,8 @@ router.post('/requests/:userId/accept', authorizeRoles('user'), acceptFriendRequ
 router.post('/requests/:userId/reject', authorizeRoles('user'), rejectFriendRequest);
 // get pending requests
 router.get('/requests/pending', authorizeRoles('user'), getFriendRequests);
+// get sent requests
+router.get('/requests/sent', authorizeRoles('user'), getSentRequests);
 // Remove friend
 router.delete('/connections/:userId/remove', authorizeRoles('user'), removeFriend);
 // View all connections

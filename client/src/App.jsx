@@ -1,5 +1,6 @@
+// src/App.js
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -24,13 +25,12 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import TaskBoard from "./pages/TaskBoard";
+
 import TaskDetails from "./pages/TaskDetails";
 import ChatUI from "./pages/ChatUI";
 import TransactionHistory from "./pages/TransactionHistory";
 import NotificationsPanel from "./pages/NotificationsPanel";
-import ChatContext from "./contexts/ChatContext";
-import FriendsListRoute from './routes/FriendsListRoute';
+import TaskBoard from "./pages/TaskBoard";
 
 function App() {
   return (
@@ -49,29 +49,23 @@ function App() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
-                        {/* Protected Routes */}
                         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                         <Route path="/task-board" element={<ProtectedRoute><TaskBoard /></ProtectedRoute>} />
                         <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetails /></ProtectedRoute>} />
-                        <Route path="/friends" element={<ProtectedRoute><FriendsListRoute /></ProtectedRoute>} />
+
+                        {/* ✅ Simplified Friends Route */}
+                        <Route path="/friends" element={<ProtectedRoute><FriendsList /></ProtectedRoute>} />
+
                         <Route path="/chat" element={<ProtectedRoute><ChatUI /></ProtectedRoute>} />
                         <Route path="/chat/:friendId" element={<ProtectedRoute><ChatUI /></ProtectedRoute>} />
                         <Route path="/transactions" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
                         <Route path="/notifications" element={<ProtectedRoute><NotificationsPanel /></ProtectedRoute>} />
-                        {/* Redirect to home for unknown routes */}
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                       <ToastContainer
                         position="top-right"
                         autoClose={5000}
-                        hideProgressBar={false}
-                        newestOnTop={false}
-                        closeOnClick
-                        rtl={false}
-                        pauseOnFocusLoss
-                        draggable
-                        pauseOnHover
                         theme="dark"
                       />
                     </div>

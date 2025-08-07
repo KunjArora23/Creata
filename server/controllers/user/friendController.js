@@ -45,6 +45,19 @@ export const getFriendRequests = async (req, res, next) => {
   }
 }
 
+// get all sent friend requests
+export const getSentRequests = async (req, res, next) => {
+  try {
+    const currentUser = req.user._id;
+    const user = await User.findById(currentUser).populate('sentRequests', 'name email avatarUrl skills bio status');
+    const sentRequests = user.sentRequests;
+    return res.json({ success: true, message: 'Sent requests fetched.', sentRequests });
+
+  } catch (err) {
+    next(err);
+  }
+}
+
 // Accept a friend request
 export const acceptFriendRequest = async (req, res, next) => {
   try {

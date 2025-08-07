@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../contexts/useAuth";
-import { useFriend } from "../contexts/FriendContext";
+import  useFriend from "../contexts/useFriend.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -44,7 +44,7 @@ const Navbar = () => {
                 className="px-5 py-2 rounded-lg font-semibold text-[#F2F3F5] bg-[#21262C] border border-[#30363D] hover:bg-[#161B22] transition-colors flex items-center gap-2"
             >
                 <LayoutDashboard className="w-4 h-4" />
-                <span className="hidden sm:inline">Dashboard</span>
+                <span className=" sm:inline">Dashboard</span>
             </Link>
             
             <Link 
@@ -53,7 +53,7 @@ const Navbar = () => {
                 className="px-5 py-2 rounded-lg font-semibold text-[#F2F3F5] bg-[#21262C] border border-[#30363D] hover:bg-[#161B22] transition-colors flex items-center gap-2"
             >
                 <ClipboardList className="w-4 h-4" />
-                <span className="hidden sm:inline">Tasks</span>
+                <span className=" sm:inline">Tasks</span>
             </Link>
             
             <Link 
@@ -62,7 +62,7 @@ const Navbar = () => {
                 className="px-5 py-2 rounded-lg font-semibold text-[#F2F3F5] bg-[#21262C] border border-[#30363D] hover:bg-[#161B22] transition-colors flex items-center gap-2 relative"
             >
                 <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Friends</span>
+                <span className="hiden sm:inline">Friends</span>
                 {pendingRequests.length > 0 && (
                     <motion.span
                         initial={{ scale: 0 }}
@@ -80,7 +80,7 @@ const Navbar = () => {
                 className="px-5 py-2 rounded-lg font-semibold text-[#F2F3F5] bg-[#21262C] border border-[#30363D] hover:bg-[#161B22] transition-colors flex items-center gap-2 relative"
             >
                 <MessageSquare className="w-4 h-4" />
-                <span className="hidden sm:inline">Chat</span>
+                <span className=" sm:inline">Chat</span>
                 {totalUnreadMessages > 0 && (
                     <motion.span
                         initial={{ scale: 0 }}
@@ -98,14 +98,14 @@ const Navbar = () => {
                 className="px-5 py-2 rounded-lg font-semibold text-[#F2F3F5] bg-[#21262C] border border-[#30363D] hover:bg-[#161B22] transition-colors flex items-center gap-2"
             >
                 <User className="w-4 h-4" />
-                <span className="hidden sm:inline">Profile</span>
+                <span className=" sm:inline">Profile</span>
             </Link>
             
             <button 
                 onClick={handleLogout}
                 className="px-5 py-2 rounded-lg font-semibold text-[#F2F3F5] bg-[#EF4444] hover:bg-[#DC2626] transition-colors cursor-pointer flex items-center gap-2"
             >
-                <span className="hidden sm:inline">Logout</span>
+                <span className=" sm:inline">Logout</span>
             </button>
         </>
     );
