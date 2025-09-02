@@ -15,7 +15,7 @@ const TaskSection = ({ title, tasks, icon: Icon, color, onRequest }) => {
       transition={{ duration: 0.6 }}
       className="mb-12"
     >
-      {/* Section header */}
+      
       <div className="flex items-center gap-3 mb-6">
         <div className={`p-3 rounded-xl ${color}`}>
           <Icon className="w-6 h-6 text-white" />
@@ -26,7 +26,7 @@ const TaskSection = ({ title, tasks, icon: Icon, color, onRequest }) => {
         </span>
       </div>
       
-      {/* Empty state */}
+    
       {tasks.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -40,7 +40,7 @@ const TaskSection = ({ title, tasks, icon: Icon, color, onRequest }) => {
         </motion.div>
       ) : (
         <>
-          {/* Task grid */}
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayedTasks.map((task, index) => (
               <TaskCard 
@@ -52,7 +52,7 @@ const TaskSection = ({ title, tasks, icon: Icon, color, onRequest }) => {
             ))}
           </div>
           
-          {/* Show more/less toggle */}
+         
           {hasMoreTasks && (
             <motion.div className="flex justify-center mt-8">
               <motion.button

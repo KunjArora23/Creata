@@ -5,12 +5,13 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 
 // Map to keep track of online users and their socket IDs
-const onlineUsers = new Map();
+export const onlineUsers = new Map();
+export let io = null;
 
 export default function initSocket(server) {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || '*', // Use environment variable for production
+      origin: process.env.FRONTEND_URL || '*', 
       methods: ['GET', 'POST'],
       credentials: true // Allow cookies
     }
@@ -24,13 +25,9 @@ export default function initSocket(server) {
       if (!cookies) return next(new Error('Authentication required'));
 
       // Parse cookies to get accessToken
-      // console.log('cookies', cookies);
       const cookiePairs = cookies.split(';').map(pair => pair.trim().split('='));
-      // console.log('cookiePairs', cookiePairs);
       const cookieMap = Object.fromEntries(cookiePairs);
-      // console.log('cookieMap', cookieMap);
       const token = cookieMap.accessToken;
-      // console.log('token', token);
 
       if (!token) return next(new Error('Authentication required'));
 
@@ -47,22 +44,35 @@ export default function initSocket(server) {
     const userId = socket.user._id;
     onlineUsers.set(userId, socket.id);
 
-    // --- CHAT EVENTS ---
+  
     // Send message
-    // Send message
-    socket.on('chat:send', async ({ receiverId, content }, callback) => {
-      if (!receiverId || !content) {
+    socket.on('chat:send', async ({ receiverId, content, imageUrl, messageType = 'text' }, callback) => {
+      if (!receiverId || (!content && !imageUrl)) {
         return callback({ success: false, message: 'Invalid data' });
       }
 
       try {
-        // Only allow messaging between friends (enforced on backend)
+        // Only allow messaging between friends 
         const sender = await User.findById(userId);
         if (!sender.friends.includes(receiverId)) {
           return callback({ success: false, message: 'Can only message friends.' });
         }
 
-        const message = await Message.create({ senderId: userId, receiverId, content });
+        const messageData = {
+          senderId: userId,
+          receiverId,
+          messageType
+        };
+
+        if (content) {
+          messageData.content = content;
+        }
+
+        if (imageUrl) {
+          messageData.imageUrl = imageUrl;
+        }
+
+        const message = await Message.create(messageData);
 
         // Emit to receiver if online
         const receiverSocketId = onlineUsers.get(receiverId.toString());
@@ -71,7 +81,9 @@ export default function initSocket(server) {
             _id: message._id,
             senderId: userId,
             receiverId,
-            content,
+            content: message.content,
+            imageUrl: message.imageUrl,
+            messageType: message.messageType,
             timestamp: message.timestamp,
             isRead: false
           });
@@ -82,7 +94,9 @@ export default function initSocket(server) {
           _id: message._id,
           senderId: userId,
           receiverId,
-          content,
+          content: message.content,
+          imageUrl: message.imageUrl,
+          messageType: message.messageType,
           timestamp: message.timestamp,
           isRead: false
         });
@@ -99,7 +113,7 @@ export default function initSocket(server) {
       await Message.updateMany({ senderId, receiverId: userId, isRead: false }, { isRead: true });
     });
 
-    // --- NOTIFICATION EVENTS ---
+  
     // Send notification
     socket.on('notify:send', async ({ userId: targetUserId, type, content }) => {
       const notification = await Notification.create({ userId: targetUserId, type, content });

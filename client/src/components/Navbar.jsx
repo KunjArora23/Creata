@@ -113,7 +113,7 @@ const Navbar = () => {
     return (
         <nav className="w-full px-4 py-3 flex items-center justify-between bg-[#0D1117] border-b border-[#30363D] font-inter sticky top-0 z-50">
             <Link to="/" className="text-2xl font-grotesk font-extrabold text-[#F2F3F5] tracking-tight">
-                CredMate
+                Creata
             </Link>
             
             {/* Desktop Navigation */}

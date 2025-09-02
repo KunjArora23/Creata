@@ -22,7 +22,7 @@ const CreateTaskForm = ({ showForm, setShowForm, onSubmit, form, setForm, submit
           onSubmit={onSubmit}
           className="mb-8 rounded-2xl border border-[#30363D] bg-gradient-to-br from-[#161B22] to-[#1F2937] p-8 space-y-6 shadow-[0_8px_32px_0_rgba(99,102,241,0.1)]"
         >
-          {/* Form header */}
+         
           <div className="text-center mb-6">
             <h3 className="text-2xl font-bold text-[#F2F3F5] font-grotesk">Create New Task</h3>
             <p className="text-[#AAB1B8] mt-2">Share your task with the community</p>
@@ -93,7 +93,7 @@ const CreateTaskForm = ({ showForm, setShowForm, onSubmit, form, setForm, submit
             <CalendarDays className="absolute right-4 top-10 h-5 w-5 text-[#6366F1] pointer-events-none" />
           </div>
 
-          {/* Form actions */}
+          
           <div className="flex gap-4 pt-4">
             <motion.button
               type="submit"

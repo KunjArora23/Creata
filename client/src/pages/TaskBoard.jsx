@@ -21,8 +21,31 @@ const TaskBoard = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Filter tasks by different categories
-  const tasksByOthers = tasks.filter(task => task.createdBy?._id !== userId);
+
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+  
+  const tasksByOthers = tasks
+    .filter(task => {
+     
+      if (task.createdBy?._id === userId) return false;
+      
+     
+      if (task.deadline) {
+        const taskDeadline = new Date(task.deadline);
+        taskDeadline.setHours(0, 0, 0, 0); 
+        return taskDeadline >= currentDate;
+      }
+      
+      return false; // Exclude tasks without deadline
+    })
+    .sort((a, b) => {
+      // Sort by most recent first (newest tasks at the top)
+      const dateA = new Date(a.createdAt || a.updatedAt || 0);
+      const dateB = new Date(b.createdAt || b.updatedAt || 0);
+      return dateB - dateA;
+    });
+    
   const tasksByMe = tasks.filter(task => task.createdBy?._id === userId);
   const tasksAssignedToMe = tasks.filter(task => task.assignedTo?._id === userId);
   const tasksRequestedByMe = tasks.filter(task => 
@@ -78,7 +101,7 @@ const TaskBoard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0D1117] to-[#161B22] p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+      
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-extrabold text-[#F2F3F5] font-grotesk mb-2">Task Board</h1>
@@ -95,7 +118,7 @@ const TaskBoard = () => {
           </motion.button>
         </div>
 
-        {/* Create Task Form */}
+       
         <CreateTaskForm
           showForm={showForm}
           setShowForm={setShowForm}
@@ -105,7 +128,7 @@ const TaskBoard = () => {
           submitting={submitting}
         />
 
-        {/* Task Sections */}
+       
         <div className="space-y-12">
           <TaskSection
             title="Tasks Posted by Other Users"

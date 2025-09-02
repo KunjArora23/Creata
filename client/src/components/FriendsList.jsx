@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import useFriend from '../contexts/useFriend.js';
 import { Search, UserPlus, Users } from 'lucide-react';
 import TabButton from './TabButton.jsx';
@@ -14,11 +13,10 @@ function FriendsList() {
     searchUsers,
   } = useFriend();
 
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('friends');
 
-  // Debounce search
+  
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim().length > 2 || searchQuery.trim().length === 0) {

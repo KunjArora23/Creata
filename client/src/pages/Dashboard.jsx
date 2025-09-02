@@ -11,7 +11,7 @@ const Dashboard = () => {
   const { notifications, loading: notificationsLoading } = useNotification();
   const { transactions, loading: transactionsLoading } = useTransaction();
 
-  // Calculate credits from transactions (sum of all credits)
+
   const {user}=useAuth();
   
 

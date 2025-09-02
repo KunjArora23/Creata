@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  skills: [{
+  skills: [{ 
     type: String,
     trim: true
   }],
@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
   isBanned: { type: Boolean, default: false },
   refreshTokens: [{
     type: String
-    // Store hashed refresh tokens for security (optional, can be plain if using JWT blacklist)
+    
   }],
   otp: {
     type: String,

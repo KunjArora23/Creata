@@ -45,7 +45,7 @@ export const requestTask = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Task not found' });
     }
 
-    // Check if user is the task creator
+
     if (task.createdBy.equals(req.user._id)) {
       return res.status(400).json({
         success: false,
@@ -53,7 +53,7 @@ export const requestTask = async (req, res, next) => {
       });
     }
 
-    // Check if already requested (using toString() for reliable comparison)
+ 
     if (task.requests.some(requestId => requestId.toString() === req.user._id.toString())) {
       return res.status(400).json({
         success: false,
@@ -61,7 +61,7 @@ export const requestTask = async (req, res, next) => {
       });
     }
 
-    // Check task status and request limit
+    // agr task kisi or ne request kra h to koi or req kr skta h if req se aage bd gya h status to koi or user req ni bhej skta
     if (task.status !== 'open' && task.status !== 'requested') {
       return res.status(400).json({
         success: false,
@@ -76,10 +76,10 @@ export const requestTask = async (req, res, next) => {
       });
     }
 
-    // Add request
+   
     task.requests.push(req.user._id);
 
-    // Update status if first request
+   
     if (task.status === 'open') {
       task.status = 'requested';
     }
@@ -190,6 +190,7 @@ export const extendDeadline = async (req, res) => {
     if (!task) {
       return res.status(404).json({ success: false, message: 'Task not found' });
     }
+    
     if (!task.createdBy.equals(req.user._id)) {
       return res.status(403).json({ success: false, message: 'Not authorized as task not created by you' });
     }
@@ -225,11 +226,12 @@ export const completeTask = async (req, res, next) => {
       if (escrow) {
         escrow.status = 'released';
         await escrow.save();
-        // Transfer credits to assignee
+       
+
         const assignee = await User.findById(task.assignedTo);
         assignee.credits += escrow.heldAmount;
         await assignee.save();
-        // Record transaction
+  
         await Transaction.create({
           fromUser: task.createdBy,
           toUser: task.assignedTo,
@@ -264,11 +266,12 @@ export const cancelTask = async (req, res, next) => {
     if (escrow) {
       escrow.status = 'refunded';
       await escrow.save();
-      // Refund credits to creator
+
+      // Refunding credits to creator
       const creator = await User.findById(task.createdBy);
       creator.credits += escrow.heldAmount;
       await creator.save();
-      // Record transaction
+
       await Transaction.create({
         fromUser: task.assignedTo,
         toUser: task.createdBy,
@@ -297,7 +300,7 @@ export const withdrawFromTask = async (req, res, next) => {
     if (task.status !== 'assigned' && task.status !== 'in_progress') {
       return res.status(400).json({ success: false, message: 'Cannot withdraw from task at this stage' });
     }
-    // If task already started, refund the escrowed reward
+    // If task already started, refund the  amount
     if (task.status === 'in_progress') {
       const escrow = await Escrow.findOne({ taskId: task._id, status: 'holding' });
       if (escrow) {
@@ -316,6 +319,7 @@ export const withdrawFromTask = async (req, res, next) => {
         });
       }
     }
+    
     // Reset assignment and change status
     task.assignedTo = undefined;
     task.status = task.requests.length > 0 ? 'requested' : 'open';

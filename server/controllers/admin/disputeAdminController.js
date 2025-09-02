@@ -20,7 +20,7 @@ export const getAllDisputes = async (req, res, next) => {
 export const resolveDispute = async (req, res, next) => {
   try {
     const { disputeId } = req.params;
-    const { resolution, action } = req.body; // action: 'release' or 'refund'
+    const { resolution, action } = req.body;  
     const dispute = await Dispute.findById(disputeId);
 
 

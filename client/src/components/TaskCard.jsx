@@ -12,24 +12,24 @@ const TaskCard = ({ task, index, onRequest }) => {
     navigate(`/task/${task._id}`);
   };
 
-  // Check if current user has requested this task
+
   const hasRequested = task.requests?.some(request => 
     request._id === user?._id || request.toString() === user?._id
   );
 
-  // Determine what status to display
+  
   const displayStatus = () => {
     if (hasRequested) return 'requested';
     if (task.status === 'requested' && !hasRequested) return 'open';
     return task.status;
   };
 
-  // Check if request button should be shown
+
   const showRequestButton = () => {
-    // Don't show if user created the task
+   
     if (task.createdBy?._id === user?._id) return false;
     
-    // Only show if task is open or requested (and user hasn't already requested)
+    
     const isOpenForRequests = ['open', 'requested'].includes(task.status);
     return isOpenForRequests && !hasRequested;
   };
@@ -41,7 +41,7 @@ const TaskCard = ({ task, index, onRequest }) => {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="group relative rounded-2xl p-6 border border-[#30363D] bg-gradient-to-br from-[#161B22] to-[#1F2937] shadow-lg hover:shadow-[0_8px_32px_0_rgba(99,102,241,0.2)] transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:border-[#6366F1]/50"
     >
-      {/* Status badge - shows 'requested' if current user has requested */}
+    
       <div className="absolute top-4 right-4">
         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
           displayStatus() === 'completed' ? 'bg-green-500/20 text-green-400' :
@@ -54,7 +54,7 @@ const TaskCard = ({ task, index, onRequest }) => {
         </span>
       </div>
       
-      {/* Task content */}
+     {/* task content */}
       <div className="mb-4">
         <h3 className="text-xl font-bold text-[#F2F3F5] font-grotesk mb-2 group-hover:text-[#6366F1] transition-colors">
           {task.title}
@@ -84,7 +84,7 @@ const TaskCard = ({ task, index, onRequest }) => {
         )}
       </div>
       
-      {/* Action buttons */}
+      
       <motion.div className="mt-4 flex gap-2">
         <motion.button
           whileHover={{ scale: 1.02 }}

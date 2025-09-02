@@ -32,11 +32,15 @@ function ChatUI() {
       friend={friends.find(f => f._id === friendId)}
       messages={(messages[friendId] || []).map(msg => ({
         ...msg,
-        isOwn: msg.senderId !== friendId // Mark as own if not from friend
+        isOwn: msg.senderId !== friendId
       }))}
-      onSend={content => {
-        sendMessage(friendId, content);
-        setTimeout(() => fetchMessages(friendId), 300); // Refresh after send
+      onSend={(content, imageUrl, messageType) => {
+        if (messageType === 'image') {
+         
+          return;
+        }
+        sendMessage(friendId, content, imageUrl, messageType);
+        setTimeout(() => fetchMessages(friendId), 300);
       }}
     />
   );

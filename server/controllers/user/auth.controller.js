@@ -23,7 +23,7 @@ const signRefreshToken = (user) => {
   );
 };
 
-// Register a new user with OTP verification
+
 export const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -41,17 +41,15 @@ export const register = async (req, res, next) => {
       });
     }
     const hashed = await bcrypt.hash(password, 10);
-    // Generate OTP
+   
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    // Send OTP email
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  
     await sendOtpEmail(email, otp);
     const user = await User.create({
       name,
       email,
       password: hashed,
-
-
       otp,
       otpExpires,
       isVerified: false
@@ -61,6 +59,7 @@ export const register = async (req, res, next) => {
       message: 'Registration successful. Please verify your email with the OTP sent.'
     });
   } catch (err) {
+    
     next(err);
   }
 };
@@ -74,7 +73,7 @@ export const verifyOtp = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
     if (user.isVerified) {
-      return res.status(400).json({ success: false, message: 'User already verified.' });
+      return res.status(409).json({ success: false, message: 'User already verified.' });
     }
     if (!user.otp || !user.otpExpires || user.otp !== otp) {
       return res.status(400).json({ success: false, message: 'Invalid OTP.' });
@@ -86,7 +85,8 @@ export const verifyOtp = async (req, res, next) => {
     user.otp = null;
     user.otpExpires = null;
     await user.save();
-    // Send signup success email
+   
+
     await sendSignupSuccessEmail(user.email, user.name);
     return res.json({ success: true, message: 'Email verified successfully.' });
   } catch (err) {
@@ -103,9 +103,9 @@ export const resendOtp = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
     if (user.isVerified) {
-      return res.status(400).json({ success: false, message: 'User already verified.' });
+      return res.status(409).json({ success: false, message: 'User already verified.' });
     }
-    // Generate new OTP
+  
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     user.otp = otp;
@@ -114,6 +114,7 @@ export const resendOtp = async (req, res, next) => {
     await sendOtpEmail(email, otp);
     return res.json({ success: true, message: 'OTP resent successfully.' });
   } catch (err) {
+    console.error(err);
     next(err);
   }
 };
@@ -130,7 +131,7 @@ export const login = async (req, res, next) => {
         message: 'Invalid credentials.'
       });
     }
-    console.log('hehe')
+    
     if (!user.isVerified) {
       return res.status(403).json({
         success: false,
@@ -144,27 +145,27 @@ export const login = async (req, res, next) => {
         message: 'Invalid credentials.'
       });
     }
-    console.log('racher hers inauth controller')
+    
 
     const accessToken = signAccessToken(user);
     const refreshToken = signRefreshToken(user);
 
-    // Store refresh token in DB for logout/invalidation
+   
     user.refreshTokens.push(refreshToken);
     await user.save();
 
-    // Set cookies with httpOnly for security
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict',
+    
+     res.cookie('accessToken', accessToken, {
+      httpOnly: true, // mtlb js access ni kr skti cookie by document.cookie krke
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000 // 15 minutes
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -195,7 +196,7 @@ export const refreshAccessToken = async (req, res, next) => {
     let payload;
     try {
       payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
-      // console.log(payload);
+      console.log(payload);
     } catch (err) {
       return res.status(401).json({
         success: false,
@@ -212,11 +213,12 @@ export const refreshAccessToken = async (req, res, next) => {
       });
     }
 
-    // Issue new access token
+    
+    
     const accessToken = signAccessToken(user);
     console.log(accessToken);
 
-    // Set new access token cookie
+
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -235,7 +237,7 @@ export const refreshAccessToken = async (req, res, next) => {
   }
 };
 
-// Logout user (clear cookies and invalidate refresh token)
+// Logout user 
 export const logout = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -255,13 +257,13 @@ export const logout = async (req, res, next) => {
 
       const user = await User.findById(payload.id);
       if (user) {
-        // Remove the refresh token from DB
+        
         user.refreshTokens = user.refreshTokens.filter((t) => t !== refreshToken);
         await user.save();
       }
     }
 
-    // Clear cookies
+    // Clear cookies so koi login na kar sake bina cookie ke
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
     return res.json({

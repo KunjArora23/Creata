@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to refresh access token
+  
   const refreshToken = async () => {
     try {
       await api.get("/api/auth/refresh-access-token");
@@ -20,15 +20,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Fetch user info from backend to check login status
+   
     const fetchUser = async () => {
       try {
         const res = await api.get("/api/profile/me");
         console.log("AuthContext");
         console.log(res.data.data);
-        setUser(res.data.data); // backend returns { data: user }
+        setUser(res.data.data); 
       } catch (error) {
-        // Set user to null for any error, but don't redirect on public routes
+        console.error("Error fetching user:", error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -37,10 +37,10 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
-  // Set up periodic token refresh (every 10 minutes) taki logout na ho jaye 
+  // yaha set interval refresh token wala function har 10 min me call kr rha h
   useEffect(() => {
     if (user) {
-      const refreshInterval = setInterval(refreshToken, 10 * 60 * 1000); // 10 minutes
+      const refreshInterval = setInterval(refreshToken, 10 * 60 * 1000); 
       
       return () => clearInterval(refreshInterval);
     }
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{ user, login, register, logout, loading }}>
       {children}
     </AuthContext.Provider>
-  );
+  );  
 };
 
 export default AuthContext; 

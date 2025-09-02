@@ -1,12 +1,17 @@
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
+
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials: true, // Send cookies with requests
 });
 
-// Add response interceptor to handle token refresh
+
+// isme if access token invalid ho jata to refresh token ki help se new access token generate krte if ho jata to jo api h use fir hit krte if ni hota means user login ni h to user ko login route pr bhej dete h
+
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -31,7 +36,9 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         const path = window.location.pathname;
+        
         // Only redirect to login for protected routes, not public routes like homepage
+        console.log(path + " in api.js");
         const protectedRoutes = ['/dashboard', '/profile', '/task-board', '/friends', '/chat', '/transactions', '/notifications'];
         const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route));
         

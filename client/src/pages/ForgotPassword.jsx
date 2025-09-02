@@ -13,7 +13,7 @@ const ForgotPassword = () => {
     setMessage("");
     setLoading(true);
     
-    // Placeholder: implement actual API call
+   
     setTimeout(() => {
       setMessage("If this email exists, a reset link will be sent.");
       setLoading(false);

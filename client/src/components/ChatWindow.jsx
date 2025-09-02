@@ -1,28 +1,95 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Image, Send, X } from 'lucide-react';
 
 function ChatWindow({ friend, messages, onSend }) {
   const [input, setInput] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-useEffect(() => {
-  const messagesContainer = messagesEndRef.current?.parentElement;
+  useEffect(() => {
+    const messagesContainer = messagesEndRef.current?.parentElement;
 
-  if (messagesContainer) {
-    const isNearBottom =
-      messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 100;
+    if (messagesContainer) {
+      const isNearBottom =
+        messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 100;
 
-    if (isNearBottom) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      if (isNearBottom) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
     }
-  }
-}, [messages]);
+  }, [messages]);
 
-  function handleSend(e) {
+  const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    onSend(input.trim());
-    setInput('');
-  }
+    if (!input.trim() && !selectedImage) return;
+
+    setIsUploading(true);
+    try {
+      if (selectedImage) {
+        // Handle image upload
+        const formData = new FormData();
+        formData.append('image', selectedImage);
+        formData.append('receiverId', friend._id);
+
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/messages/upload-image`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload image');
+        }
+
+        const result = await response.json();
+        if (result.success) {
+          // Don't call onSend for images as they're already created on the server
+          // The socket will handle the real-time update automatically
+          console.log('Image uploaded successfully');
+        }
+      } else {
+        // Handle text message
+        onSend(input.trim());
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // You might want to show a toast notification here
+    } finally {
+      setInput('');
+      setSelectedImage(null);
+      setImagePreview(null);
+      setIsUploading(false);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setImagePreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeSelectedImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   if (!friend) {
     return (
@@ -84,7 +151,19 @@ useEffect(() => {
               aria-label={msg.isOwn ? 'Your message' : `${friend.name}'s message`}
               tabIndex={0}
             >
-              {msg.content}
+              {msg.messageType === 'image' && msg.imageUrl ? (
+                <div className="space-y-2">
+                  <img
+                    src={msg.imageUrl}
+                    alt="Shared image"
+                    className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => window.open(msg.imageUrl, '_blank')}
+                  />
+                  {msg.content && <p className="text-sm">{msg.content}</p>}
+                </div>
+              ) : (
+                <p>{msg.content}</p>
+              )}
             </div>
           ))
         )}
@@ -92,12 +171,46 @@ useEffect(() => {
         <div ref={messagesEndRef} />
       </main>
 
+      {/* Image preview */}
+      {imagePreview && (
+        <div className="p-4 border-t border-gray-800 bg-gray-850">
+          <div className="relative inline-block">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="max-h-32 rounded-lg"
+            />
+            <button
+              onClick={removeSelectedImage}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input area */}
       <form
         onSubmit={handleSend}
         className="p-4 border-t border-gray-800 bg-gray-850 flex gap-3 items-center"
         aria-label="Send message"
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageSelect}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="p-3 rounded-2xl bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+          aria-label="Attach image"
+        >
+          <Image size={20} />
+        </button>
         <input
           type="text"
           value={input}
@@ -107,14 +220,19 @@ useEffect(() => {
           aria-label="Message input"
           autoComplete="off"
           spellCheck="false"
+          disabled={isUploading}
         />
         <button
           type="submit"
-          disabled={!input.trim()}
+          disabled={(!input.trim() && !selectedImage) || isUploading}
           className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Send message"
         >
-          Send
+          {isUploading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <Send size={20} />
+          )}
         </button>
       </form>
     </div>

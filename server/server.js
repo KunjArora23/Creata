@@ -36,13 +36,13 @@ app.use(cors({
 }))
 
 // Health check route
-app.get('/api/ping', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Creata API is running! 🚀',
-    timestamp: new Date().toISOString()
-  });
-});
+// app.get('/api/ping', (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: 'Creata API is running! 🚀',
+//     timestamp: new Date().toISOString()
+//   });
+// });
 
 // user Routes
 app.use('/api/auth', authRoutes);
@@ -58,13 +58,15 @@ app.use('/api/notifications', notificationRoutes);
 // admin routes
 app.use('/api/admin', adminDisputeRoutes);
 
+
+// yaha pr line by line execute hota h if upr route ni milega so not found call hoga if not found neeche kr dia err upr to phle error call hoga but koi error ni h to skip ho jayega then not found fir vaha se error pr ni jaa payega as not found ke baad koi error handler middlerware hoga ni so app crash kr skta kuch response ni aayega fir error aane pr
 // 404 handler
 app.use(notFound);
 
 // Error handling middleware ye error handle karega
 app.use(errorHandler);
 
-// Connect to MongoDB
+
 connectDB();
 
 
@@ -75,6 +77,6 @@ const server = http.createServer(app);
 initSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`🚀 Credmate server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/ping`);
+  console.log(`🚀 Creata server running on port ${PORT}`);
+
 }); 

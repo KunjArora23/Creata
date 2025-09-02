@@ -27,8 +27,7 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // Add more notification actions as needed (mark as read)
-
+  
   return (
     <NotificationContext.Provider value={{ notifications, loading, fetchNotifications }}>
       {children}

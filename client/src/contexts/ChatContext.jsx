@@ -2,6 +2,8 @@ import React, { createContext, useState, useEffect } from 'react';
 import api from '../services/api';
 import { io } from 'socket.io-client';
 import AuthContext from './AuthContext';
+import { useContext } from 'react';
+import { useCallback } from 'react';
 
 const ChatContext = createContext();
 
@@ -10,7 +12,7 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState({});
   const [activeChat, setActiveChat] = useState(null);
   const [socket, setSocket] = useState(null);
-  const { logout } = React.useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
 
   // Fetch all connected friends
   useEffect(() => {
@@ -26,7 +28,7 @@ export const ChatProvider = ({ children }) => {
   }, []);
 
   // Helper to connect socket with retry on token expiration
-  const connectSocket = React.useCallback(async () => {
+  const connectSocket = useCallback(async () => {
     let newSocket;
     let triedRefresh = false;
     while (true) {
@@ -34,7 +36,8 @@ export const ChatProvider = ({ children }) => {
         withCredentials: true,
         autoConnect: false,
       });
-      // Listen for connection error
+      
+
       let authFailed = false;
       newSocket.on('connect_error', async (err) => {
         if (err && err.message && err.message.includes('Authentication')) {
@@ -42,17 +45,17 @@ export const ChatProvider = ({ children }) => {
             triedRefresh = true;
             try {
               await api.get('/api/auth/refresh-access-token');
-              // Try again with new token
+             
               newSocket.close();
-              // Loop will retry
+             
             } catch {
-              // Refresh failed, force logout
+          
               logout();
               authFailed = true;
               newSocket.close();
             }
           } else {
-            // Already tried refresh, force logout
+           
             logout();
             authFailed = true;
             newSocket.close();
@@ -60,7 +63,7 @@ export const ChatProvider = ({ children }) => {
         }
       });
       newSocket.connect();
-      // Wait for either connect or auth failure
+    
       await new Promise((resolve) => {
         newSocket.on('connect', resolve);
         newSocket.on('disconnect', () => {
@@ -73,7 +76,7 @@ export const ChatProvider = ({ children }) => {
     return newSocket;
   }, [logout]);
 
-  // Initialize socket connection with refresh logic
+  
   useEffect(() => {
     let activeSocket;
     connectSocket().then((sock) => {
@@ -84,7 +87,7 @@ export const ChatProvider = ({ children }) => {
     };
   }, [connectSocket]);
 
-  // Listen for incoming messages
+
   useEffect(() => {
     if (!socket) return;
 
@@ -105,11 +108,16 @@ export const ChatProvider = ({ children }) => {
     };
   }, [socket, activeChat]);
 
-  // Send message to friend
-  function sendMessage(friendId, content) {
-    if (!content.trim() || !socket) return;
+  
+  function sendMessage(friendId, content, imageUrl = null, messageType = 'text') {
+    if ((!content || !content.trim()) && !imageUrl) return;
 
-    socket.emit('chat:send', { receiverId: friendId, content }, (response) => {
+    socket.emit('chat:send', { 
+      receiverId: friendId, 
+      content: content?.trim() || null, 
+      imageUrl,
+      messageType 
+    }, (response) => {
       if (!response?.success) {
         console.error('Failed to send message:', response?.message || 'Unknown error');
       } else {
@@ -118,7 +126,7 @@ export const ChatProvider = ({ children }) => {
     });
   }
 
-  // Load message history from server
+
   function fetchMessages(friendId) {
     api.get(`/api/messages/${friendId}`)
       .then((res) => {

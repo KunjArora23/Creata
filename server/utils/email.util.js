@@ -28,7 +28,7 @@ export const sendSignupSuccessEmail = async (to, name) => {
   await transporter.sendMail({
     from: process.env.SMTP_USER,
     to,
-    subject: 'Welcome to CredMate!',
+    subject: 'Welcome to Creata!',
     html: `<p>Hi ${name},<br/>Your account has been created successfully. Welcome aboard!</p>`
   });
 };
