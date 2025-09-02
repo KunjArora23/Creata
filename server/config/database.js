@@ -2,14 +2,8 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(
-      process.env.NODE_ENV === 'production' 
-        ? process.env.MONGODB_URI_PROD  // 👉 production ke liye alag URI use kar raha
-        : process.env.MONGODB_URI,      // 👉 development ke liye local URI
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
+    const conn = await mongoose.connect( 
+      process.env.MONGODB_URI,      // 👉 development ke liye local UR
     );
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
