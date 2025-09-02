@@ -11,7 +11,7 @@ export let io = null;
 export default function initSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'https://creata-kappa.vercel.app', 
+      origin: 'https://creata-kappa.vercel.app', 
       methods: ['GET', 'POST'],
       credentials: true // Allow cookies
     }
