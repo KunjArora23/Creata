@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 console.log(process.env.FRONTEND_URL);
 app.use(cors({
-  origin: "https://creata-kappa.vercel.app",
+  origin: "https://creata-omega.vercel.app",
   credentials: true,
 }))
 
